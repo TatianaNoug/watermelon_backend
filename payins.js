@@ -1,16 +1,22 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const app = express();
-
+const mysql = require('mysql');
+var payinsRouter = express.Router();
 
 app.use(bodyParser.urlencoded({extended: true}));
 
-
+let db = mysql.createConnection({
+    host: "localhost",
+    user: "root",
+    password: "root",
+    database: "watermelon",
+    port: "8889"
+});
 /****************************/
 /********** PAYINS ***********/
 /****************************/
 
-app.get('/payins', function (req, res) {
+payinsRouter.get('/payins', function (req, res) {
     let response = {"page": "wallets"};
     res.send(JSON.stringify(response));
 });

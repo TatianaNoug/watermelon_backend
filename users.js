@@ -1,16 +1,24 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const app = express();
+const mysql = require('mysql');
+
+var userRouter = express.Router();
+userRouter.use(bodyParser.urlencoded({extended: true}));
 
 
-app.use(bodyParser.urlencoded({extended: true}));
-
+let db = mysql.createConnection({
+    host: "localhost",
+    user: "root",
+    password: "root",
+    database: "watermelon",
+    port: "8889"
+});
 
 /**   depot git = watermelon_backend **************************/
 /********** USERS ***********/
 /****************************/
 
-app.post('/users', function (req, res) {
+userRouter.post('/users', function (req, res) {
     let first_name = req.body.first_name;
     let last_name = req.body.last_name;
     let email = req.body.email;
@@ -33,7 +41,7 @@ app.post('/users', function (req, res) {
     })
 });
 
-app.get('/users', function (req, res) {
+userRouter.get('/users', function (req, res) {
 
     let query = `SELECT id,first_name, last_name, email FROM users`;
     db.query(query, function (err, result, fields) {
@@ -44,7 +52,7 @@ app.get('/users', function (req, res) {
     });
 });
 
-app.get('/users/:id(\\d+)', function (req, res) {
+userRouter.get('/users/:id(\\d+)', function (req, res) {
     let id = req.params.id;
 
 
@@ -62,7 +70,7 @@ app.get('/users/:id(\\d+)', function (req, res) {
     });
 });
 
-app.put('/users/:id(\\d+)', function (req, res) {
+userRouter.put('/users/:id(\\d+)', function (req, res) {
     let id = req.params.id;
 
     let first_name = req.body.first_name;
@@ -80,7 +88,7 @@ app.put('/users/:id(\\d+)', function (req, res) {
     })
 });
 
-app.delete('/users/:id(\\d+)', function (req, res) {
+userRouter.delete('/users/:id(\\d+)', function (req, res) {
     let id = req.params.id;
 
     let query = `DELETE FROM users WHERE id=${id}`;
@@ -92,3 +100,6 @@ app.delete('/users/:id(\\d+)', function (req, res) {
         //+ first_name  + "  " +last_name + "  " +"email : "+ email +" ");
     })
 });
+
+module.exports = userRouter;
+

@@ -1,16 +1,23 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const app = express();
+const mysql = require('mysql');
 
-
+var cardsRouter = express.Router();
 app.use(bodyParser.urlencoded({extended: true}));
 
+let db = mysql.createConnection({
+    host: "localhost",
+    user: "root",
+    password: "root",
+    database: "watermelon",
+    port: "8889"
+});
 
 /****************************/
 /********** CARDS ***********/
 /****************************/
 
-app.post('/cards', function (req, res) {
+cardsRouter.post('/cards', function (req, res) {
     let user_id = req.body.user_id;
     let last_4 = req.body.last_4;
     let brand = req.body.brand;
@@ -24,14 +31,14 @@ app.post('/cards', function (req, res) {
     })
 });
 
-app.get('/cards', function (req, res) {
+cardsRouter.get('/cards', function (req, res) {
     db.query(query, function (err, result, fields) {
         if (err) throw err;
         res.send(JSON.stringify(result));
     });
 });
 
-app.put('/cards/:id(\\d+)', function (req, res) {
+cardsRouter.put('/cards/:id(\\d+)', function (req, res) {
     let id = req.params.id;
     let user_id = req.body.user_id;
     let last_4 = req.body.last_4;
@@ -47,7 +54,7 @@ app.put('/cards/:id(\\d+)', function (req, res) {
     })
 });
 
-app.delete('/cards/:id(\\d+)', function (req, res) {
+cardsRouter.delete('/cards/:id(\\d+)', function (req, res) {
     let id = req.params.id;
     let query = `DELETE FROM cards WHERE id=${id}`;
     db.query(query, function (err, result, fields) {
