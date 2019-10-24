@@ -48,7 +48,6 @@ userRouter.use(function (req, res, next) {
         req.db.query(query, function (err, result, fields) {
             if(err) throw err;
             if(result.length > 0){
-                console.log("in next");
                 next();
             }else{
                 res.status(401).send();
@@ -60,12 +59,10 @@ userRouter.use(function (req, res, next) {
 });
 
 userRouter.get('/', function (req, res) {
-
-    console.log("in get");
     let query = `SELECT id,first_name, last_name, email FROM users`;
+
     req.db.query(query, function (err, result, fields) {
         if (err) throw err;
-
         const selectedUsers =[];
         for(var i = 0; i<result.length; i++) {
             const tempUser ={
