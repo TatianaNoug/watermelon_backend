@@ -7,12 +7,13 @@ const fs = require('fs');
 var loginRouter = express.Router();
 loginRouter.use(bodyParser.urlencoded({extended: true}));
 
-
 loginRouter.post('/', function (req, res) {
    let email = req.body.email;
    let password = req.body.password;
 
-   if(email.length > 0 && password.length > 0){
+   if(email === undefined || password === undefined){
+       res.status(400).json({message : "Missing Fields"})
+   }else{
        let query = `SELECT api_key FROM users WHERE email='${email}' AND password='${password}'`;
 
        req.db.query(query, function (err, result, fields) {
@@ -27,8 +28,6 @@ loginRouter.post('/', function (req, res) {
            }
 
        })
-   }else{
-        res.status(400).send();
    }
 
 });
