@@ -4,7 +4,7 @@ const mysql = require('mysql');
 
 var cardsRouter = express.Router();
 
-app.use(bodyParser.urlencoded({extended: true}));
+cardsRouter.use(bodyParser.urlencoded({extended: true}));
 
 let db = mysql.createConnection({
     host: "localhost",

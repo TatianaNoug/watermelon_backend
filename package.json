@@ -15,5 +15,10 @@
   "bugs": {
     "url": "https://github.com/TatianaNoug/watermelon/issues"
   },
-  "homepage": "https://github.com/TatianaNoug/watermelon#readme"
+  "homepage": "https://github.com/TatianaNoug/watermelon#readme",
+  "dependencies": {
+    "fs": "0.0.1-security",
+    "hat": "0.0.3",
+    "jsonwebtoken": "^8.5.1"
+  }
 }

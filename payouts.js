@@ -3,7 +3,7 @@ const bodyParser = require('body-parser');
 const mysql = require('mysql');
 var payoutsRouter = express.Router();
 
-app.use(bodyParser.urlencoded({extended: true}));
+payoutsRouter.use(bodyParser.urlencoded({extended: true}));
 
 let db = mysql.createConnection({
     host: "localhost",
