@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/TatianaNoug/watermelon#readme",
   "dependencies": {
+    "express": "^4.17.1",
     "fs": "0.0.1-security",
     "hat": "0.0.3",
     "jsonwebtoken": "^8.5.1"

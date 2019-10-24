@@ -5,13 +5,6 @@ const mysql = require('mysql');
 var cardsRouter = express.Router();
 cardsRouter.use(bodyParser.urlencoded({extended: true}));
 
-let db = mysql.createConnection({
-    host: "localhost",
-    user: "root",
-    password: "root",
-    database: "watermelon",
-    port: "8889"
-});
 
 /****************************/
 /********** CARDS ***********/
@@ -25,7 +18,7 @@ cardsRouter.post('/cards', function (req, res) {
 
     let query = `INSERT INTO cards (user_id, last_4, brand, expired_at) VALUES ('${user_id}', '${last_4}', '${brand}', '${expired_at}')`;
 
-    db.query(query, function (err, result, fields) {
+    req.db.query(query, function (err, result, fields) {
         if (err) throw err;
         res.send(JSON.stringify("Success"));
     })

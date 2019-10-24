@@ -5,13 +5,6 @@ var payoutsRouter = express.Router();
 
 payoutsRouter.use(bodyParser.urlencoded({extended: true}));
 
-let db = mysql.createConnection({
-    host: "localhost",
-    user: "root",
-    password: "root",
-    database: "watermelon",
-    port: "8889"
-});
 
 /****************************/
 /********** PAYOUTS ***********/
