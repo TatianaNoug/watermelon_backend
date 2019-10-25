@@ -108,8 +108,6 @@ cardsRouter.put('/:id(\\d+)', function (req, res) {
                     brand: result[0].brand,
                     expired_at: result[0].expired_at
                 }
-                console.log("in");
-                console.log(JSON.stringify(updatedCard));
                 res.status(200).json(updatedCard);
             })
 
@@ -129,7 +127,6 @@ cardsRouter.delete('/:id(\\d+)', function (req, res) {
         if (err) throw err;
 
         if(result.affectedRows > 0) {
-            console.log("Card deleted");
             res.status(204).json({message: "Card deleted"});
         }else{
             res.status(404).json({message: "Card not found"})

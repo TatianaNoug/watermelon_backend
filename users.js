@@ -22,21 +22,25 @@ userRouter.post('/', function (req, res) {
         let api_key = "patate8";//hat.rack(64, 2);
 
         let query = `INSERT INTO users (first_name, last_name, email, password, is_admin, api_key) VALUES ('${first_name}', '${last_name}', '${email}', '${password}', '${is_admin}', '${api_key}')`;
-
         req.db.query(query, function (err, result, fields) {
             if (err) throw err;
 
-            const newUser = {
-                id:result.insertId,
-                access_token:api_key,
-                first_name:req.body.first_name,
-                last_name:req.body.last_name,
-                email:req.body.email,
-                is_admin:false
-            };
-            res.status(200).json(newUser);
+            if(result.affectedRows){
+                const newUser = {
+                    id:result.insertId,
+                    access_token:api_key,
+                    first_name:req.body.first_name,
+                    last_name:req.body.last_name,
+                    email:req.body.email,
+                    is_admin:false
+                };
 
-
+                res.status(200).json(newUser);
+                let query2 = "INSERT INTO wallets (user_id) VALUES (?)";
+                req.db.query(query2,result.insertId, function (err, result, fields) {
+                    if(err) throw err;
+                })
+            }
         })
 
 });
@@ -118,7 +122,7 @@ userRouter.put('/:id(\\d+)', function (req, res) {
     }
 
     let query = "UPDATE users SET ?  WHERE id=?";
-    //first_name = '${first_name}',  last_name = '${last_name}', email = '${email}', password = '${password}', is_admin = '${is_admin}'
+
     req.db.query(query, [updateDict, id], function (err, result, fields) {
         if (err) throw err;
 

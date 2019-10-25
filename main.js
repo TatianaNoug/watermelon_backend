@@ -6,7 +6,6 @@ const app = express();
 var users = require('./users');
 var login = require('./login');
 var cards = require('./cards');
-
 var wallets = require('./wallets');
 var payins = require('./payins');
 var payouts = require('./payouts');
@@ -28,10 +27,10 @@ app.use(function (req, res, next) {
 app.use('/v1/users',users);
 app.use('/v1/login', login);
 app.use('/v1/cards', cards);
-//app.use(wallets);
-//app.use(payins);
-//app.use(payouts);
-//app.use(transfers);
+app.use('/v1/wallets', wallets);
+app.use('/v1/payins', payins);
+app.use('/v1/payouts', payouts);
+//app.use('/v1/transfers', transfers);
 
 app.use(bodyParser.urlencoded({extended: true}));
 
