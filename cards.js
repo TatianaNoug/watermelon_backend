@@ -93,26 +93,31 @@ cardsRouter.put('/:id(\\d+)', function (req, res) {
     const id = req.params.id;
     const last_4 = req.body.last_4;
 
-    let query = ` UPDATE cards SET last_4 = '${last_4}' WHERE id=${id}`;
+    let query = "UPDATE cards SET last_4=? WHERE id=?";
 
-    req.db.query(query, function (err, result, fields) {
+    req.db.query(query, [last_4, id], function (err, result, fields) {
         if (err) throw err;
 
-        console.log(JSON.stringify(result));
-        if(result.length > 0) {
-            const updatedCard = {
+        if(result.affectedRows > 0) {
+            let query = "SELECT * FROM cards WHERE id =?"
+            req.db.query(query,[id], function (err, result, fields) {
+                const updatedCard = {
+                    id: result[0].id,
+                    user_id: result[0].user_id,
+                    last_4: result[0].last_4,
+                    brand: result[0].brand,
+                    expired_at: result[0].expired_at
+                }
+                console.log("in");
+                console.log(JSON.stringify(updatedCard));
+                res.status(200).json(updatedCard);
+            })
 
-                id: result[0].id,
-                user_id: result[0].user_id,
-                last_4: result[0].last_4,
-                brand: result[0].brand,
-                expired_at: result[0].expired_at
-            }
-            res.status(200).json(updatedCard);
         }else{
             res.status(404).json({message: "Card not found"})
         }
     })
+
 });
 
 cardsRouter.delete('/:id(\\d+)', function (req, res) {
@@ -123,16 +128,9 @@ cardsRouter.delete('/:id(\\d+)', function (req, res) {
     req.db.query(query, function (err, result, fields) {
         if (err) throw err;
 
-        if(result.length > 0) {
-            const deletedCard = {
-
-                id: result[0].id,
-                user_id: result[0].user_id,
-                last_4: result[0].last_4,
-                brand: result[0].brand,
-                expired_at: result[0].expired_at
-            }
-            res.status(200).json(deletedCard);
+        if(result.affectedRows > 0) {
+            console.log("Card deleted");
+            res.status(204).json({message: "Card deleted"});
         }else{
             res.status(404).json({message: "Card not found"})
         }

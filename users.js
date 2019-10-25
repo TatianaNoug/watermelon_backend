@@ -105,10 +105,21 @@ userRouter.put('/:id(\\d+)', function (req, res) {
     let email = req.body.email;
     let password = req.body.password;
     let is_admin = req.body.is_admin;
+    const updateDict = {
+      first_name: first_name,
+      last_name: last_name,
+      email: email,
+      password: password
+    };
 
-    let query = ` UPDATE users SET first_name = '${first_name}',  last_name = '${last_name}', email = '${email}', password = '${password}', is_admin = '${is_admin}' WHERE id=${id}`;
+    if (Object.keys(updateDict).length === 0) {
+        res.status(400).json({message: "Missing fields."});
+        return;
+    }
 
-    req.db.query(query, function (err, result, fields) {
+    let query = "UPDATE users SET ?  WHERE id=?";
+    //first_name = '${first_name}',  last_name = '${last_name}', email = '${email}', password = '${password}', is_admin = '${is_admin}'
+    req.db.query(query, [updateDict, id], function (err, result, fields) {
         if (err) throw err;
 
         res.status(200).json("first name : "+first_name + "  " + "last name : "+ last_name + "  " +"email : "+ email +"  "+"is admin : " +is_admin + "  ");
