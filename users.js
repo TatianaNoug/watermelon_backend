@@ -90,23 +90,27 @@ userRouter.use(function (req, res, next) {
 });
 
 userRouter.get('/', function (req, res) {
-    let query = `SELECT id,first_name, last_name, email FROM users`;
+    let query = "SELECT * FROM users WHERE id=?";
 
-    req.db.query(query, function (err, result, fields) {
+    req.db.query(query,[req.user.id], function (err, result, fields) {
         if (err) throw err;
-        const selectedUsers =[];
-        for(var i = 0; i<result.length; i++) {
-            const tempUser ={
-                id:result[i].id,
-                first_name:result[i].first_name,
-                last_name:result[i].last_name,
-                email:result[i].email,
-                is_admin:false
-            }
-            selectedUsers.push(tempUser);
-        };
+        if(result.length > 0){
+            console.log(result.length);
+            const selectedUsers =[];
+            for(let i = 0; i<result.length; i++) {
+                const tempUser ={
+                    id:result[i].id,
+                    first_name:result[i].first_name,
+                    last_name:result[i].last_name,
+                    email:result[i].email,
+                    is_admin:false
+                }
+                selectedUsers.push(tempUser);
+            };
+            console.log(selectedUsers);
+            res.status(200).json(selectedUsers);
+        }
 
-        res.status(200).json(selectedUsers);
     });
 });
 
@@ -139,26 +143,33 @@ userRouter.put('/:id(\\d+)', function (req, res) {
     let first_name = req.body.first_name;
     let last_name = req.body.last_name;
     let email = req.body.email;
-    let password = req.body.password;
 
-    if(id == req.user.id){
+    console.log(id);
+    console.log(req.user.id);
 
-        if (first_name === undefined || last_name === undefined || email === undefined || password === undefined) {
-            res.status(400).json({message: "Missing fields."});
-        }else{
-            if(email.toString().indexOf("@")>0){
-                let verifyUserQuery = "SELECT * FROM users WHERE id=?";
-                let query = "UPDATE users SET ?  WHERE id=?";
+    if (first_name === undefined || last_name === undefined || email === undefined) {
+        res.status(400).json({message: "Missing fields."});
+    }else{
+        if(email.toString().indexOf("@")>0){
+            let verifyUserQuery = "SELECT * FROM users WHERE id=?";
+            let query = "UPDATE users SET ?  WHERE id=?";
 
-                req.db.query(verifyUserQuery, [id], function (err0, result0, fields) {
-                    if(err0) throw err0;
+            const updateDict = {
+                first_name: first_name,
+                last_name: last_name,
+                email: email
+            }
 
-                    if(result0.length > 0){
+            req.db.query(verifyUserQuery, [id], function (err0, result0, fields) {
+                if(err0) throw err0;
+
+                if(result0.length > 0){
+                    if(id == req.user.id) {
                         req.db.query(query, [updateDict, id], function (err, result, fields) {
                             if (err) throw err;
 
                             const updatedUser = {
-                                id : id,
+                                id: id,
                                 first_name: first_name,
                                 last_name: last_name,
                                 email: email,
@@ -167,19 +178,19 @@ userRouter.put('/:id(\\d+)', function (req, res) {
                             res.status(200).json(updatedUser);
                         });
                     }else{
-                        res.status(404).json({message: "User not found"});
+                    res.status(403).json({message : "Access to this user forbidden "});
                     }
-                })
-
+                }else{
+                    res.status(404).json({message: "User not found"});
+                }
+            });
 
             }else {
                 res.status(400).json({message: "Invalid Email Address"});
             }
         }
 
-    }else{
-        res.status(403).json({message : "Access to this user forbidden "});
-    }
+
 
 
 });
@@ -187,14 +198,27 @@ userRouter.put('/:id(\\d+)', function (req, res) {
 userRouter.delete('/:id(\\d+)', function (req, res) {
     let id = req.params.id;
 
+    let existingUserQuery = "SELECT * FROM users WHERE id = ?";
     let query = `DELETE FROM users WHERE id=${id}`;
 
-    req.db.query(query, function (err, result, fields) {
-        if (err) throw err;
+    req.db.query(existingUserQuery,[id], function (err, result, fields) {
+        if(err) throw err;
 
-        res.status(204).json("SUCCESS DELETING USER ");
-        //+ first_name  + "  " +last_name + "  " +"email : "+ email +" ");
+        if(result.length > 0){
+            if(id == req.user.id){
+                req.db.query(query, function (err2, result2, fields2) {
+                    if (err2) throw err2;
+
+                    res.status(204).json({message: "Success"});
+                });
+            }else {
+                res.status(403).json({message: "Access Denied"});
+            }
+        }else{
+            res.status(404).json({message : "User not found"});
+        }
     })
+
 });
 
 module.exports = userRouter;
