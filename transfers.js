@@ -138,8 +138,8 @@ transfersRouter.get('/:id(\\d+)', function (req, res) {
         if(result.length > 0){
             const selectedTransfer ={
                 id:result[0].id,
-                debited_wallet_id:result[i].debited_wallet_id,
-                credited_wallet_id:result[i].credited_wallet_id,
+                debited_wallet_id:result[0].debited_wallet_id,
+                credited_wallet_id:result[0].credited_wallet_id,
                 amount:result[0].amount
             }
             res.status(200).json(selectedTransfer);
