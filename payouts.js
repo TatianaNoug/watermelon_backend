@@ -14,7 +14,7 @@ payoutsRouter.post('/', function (req, res) {
     let wallet_id = req.body.wallet_id;
     let amount = req.body.amount;
 
-    var amountString = amount.toString();
+    let amountString = amount.toString();
     if(amountString.match(/^[0-9]+$/) != null){
 
         let payinAmount = 0;
@@ -74,11 +74,11 @@ payoutsRouter.post('/', function (req, res) {
 
                                     if (result5.affectedRows > 0) {
 
-                                        var totalAmountString = amount.toString();
-                                        var first = totalAmountString.slice(0, (totalAmountString.length - 2));
-                                        var sec = totalAmountString.slice((totalAmountString.length - 2), totalAmountString.length);
-                                        var newTotalString = first + sec;
-                                        var newAmount = parseInt(newTotalString);
+                                        let totalAmountString = amount.toString();
+                                        let first = totalAmountString.slice(0, (totalAmountString.length - 2));
+                                        let sec = totalAmountString.slice((totalAmountString.length - 2), totalAmountString.length);
+                                        let newTotalString = first + sec;
+                                        let newAmount = parseInt(newTotalString);
 
                                         const payout = {
                                             id: result5.insertId,

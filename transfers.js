@@ -20,42 +20,85 @@ transfersRouter.post('/', function (req, res) {
     }else{
         var amountString = amount.toString();
         if(amountString.match(/^[0-9]+$/) != null){
-            let creditedWalletQuery = "SELECT * FROM wallets WHERE id=?";
-            let insertTransferQuery = "INSERT INTO transfers(debited_wallet_id,credited_wallet_id, amount) VALUES (?, ?, ?)  "
+            let payinAmount = 0;
+            let payoutAmout = 0;
+            let debitedAmount = 0;
+            let creditedAmount = 0;
 
-            req.db.query(creditedWalletQuery, [credited_wallet_id], function (err, result, fields) {
-                if(err) throw err;
+            let queryPayins = "SELECT amount FROM payins WHERE wallet_id=?";
+            let queryPayouts = "SELECT amount  FROM payouts WHERE wallet_id=?";
+            let queryTransfers = "SELECT debited_wallet_id, credited_wallet_id, amount FROM transfers";
 
-                console.log(credited_wallet_id);
-                console.log(debited_wallet_id);
-                console.log(result.length);
+            req.db.query(queryPayins, [debited_wallet_id], function (err2, result2, fields2) {
+                if (err2) throw err2;
 
-                if(result.length > 0){
-                    req.db.query(insertTransferQuery, [debited_wallet_id, credited_wallet_id, amount], function (err2, result2, fields2) {
-                        if(err2) throw err2;
+                if (result2.length > 0) {
+                    for (let i = 0; i < result2.length; i++) {
+                        payinAmount += result2[i].amount;
+                    }
+                }
 
-                        console.log("in query");
-                        console.log(result2.affectedRows);
-                        if(result2.affectedRows>0){
-                            const insertedTransfer = {
-                                id : result2.insertId,
-                                wallet_id : credited_wallet_id,
-                                amount : amount,
-                            };
 
-                            res.status(200).json(insertedTransfer);
+                req.db.query(queryPayouts, [debited_wallet_id], function (err3, result3, fields3) {
+                    if (err3) throw err3;
+
+                    if (result3.length > 0) {
+                        for (let i = 0; i < result3.length; i++) {
+                            payoutAmout += result3[i].amount;
+                        }
+                    }
+
+
+                    req.db.query(queryTransfers, function (err4, result4, fields4) {
+                        if (err4) throw err4;
+
+                        if (result4.length > 0) {
+                            for (let i = 0; i < result4.length; i++) {
+                                if (result4[i].debited_wallet_id === debited_wallet_id) {
+                                    debitedAmount += result4[i].amount;
+                                } else if (result4[i].credited_wallet_id === debited_wallet_id) {
+                                    creditedAmount += result4[i].amount;
+                                }
+                            }
+                        }
+                        let totalAmount = creditedAmount + payinAmount - debitedAmount - payoutAmout;
+
+                        if (Number(totalAmount) >= Number(amount)) {
+
+                            let creditedWalletQuery = "SELECT * FROM wallets WHERE id=?";
+                            let insertTransferQuery = "INSERT INTO transfers(debited_wallet_id,credited_wallet_id, amount) VALUES (?, ?, ?)  "
+
+                            req.db.query(creditedWalletQuery, [credited_wallet_id], function (err, result, fields) {
+                                if (err) throw err;
+
+                                if (result.length > 0) {
+                                    req.db.query(insertTransferQuery, [debited_wallet_id, credited_wallet_id, amount], function (err2, result2, fields2) {
+                                        if (err2) throw err2;
+
+                                        if (result2.affectedRows > 0) {
+                                            const insertedTransfer = {
+                                                id: result2.insertId,
+                                                wallet_id: credited_wallet_id,
+                                                amount: Number(amount)
+                                            };
+
+                                            res.status(200).json(insertedTransfer);
+                                        }
+                                    });
+                                }else{
+                                res.status(400).json({message : "User not found "})
+                            }
+                            });
+                        } else {
+                            res.status(400).json({message: "Invalid Amount"});
                         }
                     });
-                }else{
-                    console.log("in not found");
-                    res.status(400).json({message : "User not found "})
-                }
+                });
             });
         }else{
             res.status(400).json({message:"Invalid Amount Format"});
         }
     }
-
 });
 
 transfersRouter.get('/', function (req, res) {

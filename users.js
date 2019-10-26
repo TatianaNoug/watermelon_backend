@@ -6,7 +6,6 @@ const jwt = require('jsonwebtoken');
 const fs = require('fs');
 
 var userRouter = express.Router();
-var courantUser;
 
 userRouter.use(bodyParser.urlencoded({extended: true}));
 
@@ -21,29 +20,48 @@ userRouter.post('/', function (req, res) {
         let email = req.body.email;
         let password = req.body.password;
         let is_admin = 0;
-        let api_key = "patate8";//hat.rack(64, 2);
+        let api_key = hat();
 
-        let query = `INSERT INTO users (first_name, last_name, email, password, is_admin, api_key) VALUES ('${first_name}', '${last_name}', '${email}', '${password}', '${is_admin}', '${api_key}')`;
-        let query2 = "INSERT INTO wallets (user_id) VALUES (?)";
-        req.db.query(query, function (err, result, fields) {
-            if (err) throw err;
+    if(first_name === undefined || last_name === undefined || email === undefined || password === undefined){
+        res.status(400).json({message : "Missing fields"});
+    }else {
+        if(email.toString().indexOf("@")>0){
+            let verifyEmailQuery = "SELECT * FROM users WHERE email=?";
+            req.db.query(verifyEmailQuery, [email], function (err0, result0, fields0) {
+               if(err0) throw err0;
 
-            if(result.affectedRows){
-                const newUser = {
-                    id:result.insertId,
-                    access_token:api_key,
-                    first_name:req.body.first_name,
-                    last_name:req.body.last_name,
-                    email:req.body.email,
-                    is_admin:false
-                };
+               if(result0.length > 0){
+                   res.status(400).json({message : "Email Address Already Exists"});
+               }else{
+                   let query = `INSERT INTO users (first_name, last_name, email, password, is_admin, api_key) VALUES ('${first_name}', '${last_name}', '${email}', '${password}', '${is_admin}', '${api_key}')`;
+                   let query2 = "INSERT INTO wallets (user_id) VALUES (?)";
+                   req.db.query(query, function (err, result, fields) {
+                       if (err) throw err;
 
-                res.status(200).json(newUser);
-                req.db.query(query2,[result.insertId], function (err, result, fields) {
-                    if(err) throw err;
-                })
-            }
-        })
+                       if (result.affectedRows) {
+                           const newUser = {
+                               id: result.insertId,
+                               access_token: api_key,
+                               first_name: req.body.first_name,
+                               last_name: req.body.last_name,
+                               email: req.body.email,
+                               is_admin: false
+                           };
+
+                           res.status(200).json(newUser);
+                           req.db.query(query2, [result.insertId], function (err, result, fields) {
+                               if (err) throw err;
+                           })
+                       }
+                   });
+               }
+            });
+
+        }else{
+            res.status(400).json({message : "Invalid email address"});
+        }
+
+    }
 
 });
 
@@ -95,48 +113,75 @@ userRouter.get('/', function (req, res) {
 userRouter.get('/:id(\\d+)', function (req, res) {
     let id = req.params.id;
 
+    let query = "SELECT * FROM users WHERE id=?";
 
-    let first_name = req.body.first_name;
-    let last_name = req.body.last_name;
-    let email = req.body.email;
-    let is_admin = req.body.is_admin;
-
-    let query = `SELECT first_name, last_name, email, is_admin FROM users WHERE id=${id}`;
-
-    req.db.query(query, function (err, result, fields) {
+    req.db.query(query,[id], function (err, result, fields) {
         if (err) throw err;
 
-        res.status(200).json(result);//"first name : "+first_name + "  " + "last name : "+ last_name + "  " +"email : "+ email +"  "+"is admin : " +is_admin + "  ");
+        if(result.length > 0){
+            const selectedUser = {
+                id: result[0].id,
+                first_name: result[0].first_name,
+                last_name: result[0].last_name,
+                email: result[0].email,
+                is_admin: false
+            }
+
+            res.status(200).json(selectedUser);
+        }else{
+            res.status(404).json({message: "User not found"});
+        }
     });
 });
 
 userRouter.put('/:id(\\d+)', function (req, res) {
     let id = req.params.id;
-
     let first_name = req.body.first_name;
     let last_name = req.body.last_name;
     let email = req.body.email;
     let password = req.body.password;
-    let is_admin = req.body.is_admin;
-    const updateDict = {
-      first_name: first_name,
-      last_name: last_name,
-      email: email,
-      password: password
-    };
 
-    if (Object.keys(updateDict).length === 0) {
-        res.status(400).json({message: "Missing fields."});
-        return;
+    if(id == req.user.id){
+
+        if (first_name === undefined || last_name === undefined || email === undefined || password === undefined) {
+            res.status(400).json({message: "Missing fields."});
+        }else{
+            if(email.toString().indexOf("@")>0){
+                let verifyUserQuery = "SELECT * FROM users WHERE id=?";
+                let query = "UPDATE users SET ?  WHERE id=?";
+
+                req.db.query(verifyUserQuery, [id], function (err0, result0, fields) {
+                    if(err0) throw err0;
+
+                    if(result0.length > 0){
+                        req.db.query(query, [updateDict, id], function (err, result, fields) {
+                            if (err) throw err;
+
+                            const updatedUser = {
+                                id : id,
+                                first_name: first_name,
+                                last_name: last_name,
+                                email: email,
+                                is_admin: false
+                            }
+                            res.status(200).json(updatedUser);
+                        });
+                    }else{
+                        res.status(404).json({message: "User not found"});
+                    }
+                })
+
+
+            }else {
+                res.status(400).json({message: "Invalid Email Address"});
+            }
+        }
+
+    }else{
+        res.status(403).json({message : "Access to this user forbidden "});
     }
 
-    let query = "UPDATE users SET ?  WHERE id=?";
 
-    req.db.query(query, [updateDict, id], function (err, result, fields) {
-        if (err) throw err;
-
-        res.status(200).json("first name : "+first_name + "  " + "last name : "+ last_name + "  " +"email : "+ email +"  "+"is admin : " +is_admin + "  ");
-    })
 });
 
 userRouter.delete('/:id(\\d+)', function (req, res) {
