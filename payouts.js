@@ -14,18 +14,20 @@ payoutsRouter.post('/', function (req, res) {
     let wallet_id = req.body.wallet_id;
     let amount = req.body.amount;
 
-    const amountString = amount.toString();
+    var amountString = amount.toString();
     if(amountString.match(/^[0-9]+$/) != null){
+        console.log("in");
         let selectWalletQuery = "SELECT * FROM wallets where id = ?";
-        let query = "INSERT INTO payouts (wallet_id, amount) VALUES (?, ?)";
+        let insertQuery = "INSERT INTO payouts (wallet_id, amount) VALUES (?, ?)";
 
         req.db.query(selectWalletQuery, [wallet_id], function (err, result, fields) {
             if(err) throw err;
-
+            console.log(result.length);
             if(result.length>0){
-                req.db.query(query, [result[0].id, amount], function (err2, result2, fields2) {
+                req.db.query(insertQuery, [result[0].id, amount], function (err2, result2, fields2) {
                     if(err2) throw err2;
 
+                    console.log(result2.affectedRows);
                     if(result2.affectedRows>0){
 
                         var totalAmountString = amount.toString();

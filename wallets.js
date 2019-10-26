@@ -14,9 +14,9 @@ walletsRouter.use(bodyParser.urlencoded({extended: true}));
 walletsRouter.get('/', function (req, res) {
 
     let queryWallet = "SELECT id FROM wallets";
-    let queryPayins = "SELECT amount as payinsAmount FROM payins WHERE wallet_id=?";
-    let queryPayouts = "SELECT amount as payoutsAmount FROM payouts WHERE wallet_id=?";
-    let queryTransfers = "SELECT debited_wallet_id, credited_wallet_id, amount as transfersAmount FROM transfers";
+    let queryPayins = "SELECT amount FROM payins WHERE wallet_id=?";
+    let queryPayouts = "SELECT amount  FROM payouts WHERE wallet_id=?";
+    let queryTransfers = "SELECT debited_wallet_id, credited_wallet_id, amount FROM transfers";
 
 
     req.db.query(queryWallet, function (err, result, fields) {
@@ -59,7 +59,7 @@ walletsRouter.get('/', function (req, res) {
                                     }
                                 }
                             }
-
+                            
                             var totalAmount = creditedAmount + payinAmount - debitedAmount - payoutAmout;
 
                             var totalAmountString = totalAmount.toString();
@@ -73,6 +73,8 @@ walletsRouter.get('/', function (req, res) {
                                 balance: totalAmount
                             }
                             walletSelected.push(tempWallet);
+
+                            console.log(walletSelected);
                             res.status(200).json(walletSelected);
                         })
                     })
