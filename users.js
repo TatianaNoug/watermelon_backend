@@ -6,6 +6,8 @@ const jwt = require('jsonwebtoken');
 const fs = require('fs');
 
 var userRouter = express.Router();
+var courantUser;
+
 userRouter.use(bodyParser.urlencoded({extended: true}));
 
 /**   depot git = watermelon_backend **************************/
@@ -22,6 +24,7 @@ userRouter.post('/', function (req, res) {
         let api_key = "patate8";//hat.rack(64, 2);
 
         let query = `INSERT INTO users (first_name, last_name, email, password, is_admin, api_key) VALUES ('${first_name}', '${last_name}', '${email}', '${password}', '${is_admin}', '${api_key}')`;
+        let query2 = "INSERT INTO wallets (user_id) VALUES (?)";
         req.db.query(query, function (err, result, fields) {
             if (err) throw err;
 
@@ -36,8 +39,7 @@ userRouter.post('/', function (req, res) {
                 };
 
                 res.status(200).json(newUser);
-                let query2 = "INSERT INTO wallets (user_id) VALUES (?)";
-                req.db.query(query2,result.insertId, function (err, result, fields) {
+                req.db.query(query2,[result.insertId], function (err, result, fields) {
                     if(err) throw err;
                 })
             }
@@ -48,10 +50,17 @@ userRouter.post('/', function (req, res) {
 userRouter.use(function (req, res, next) {
     if("x-auth-token" in req.headers){
         let access_token = req.headers["x-auth-token"];
-        let query = `SELECT * FROM users WHERE api_key = '${access_token}'`;
+        let query = `SELECT users.id, users.email, users.is_admin, wallets.id as wallet_id FROM users JOIN wallets on users.id = wallets.user_id WHERE api_key = '${access_token}'`;
+
         req.db.query(query, function (err, result, fields) {
             if(err) throw err;
             if(result.length > 0){
+                req.user = {
+                    id: result[0].id,
+                    email: result[0].email,
+                    is_admin: false,
+                    wallet_id: result[0].wallet_id
+                };
                 next();
             }else{
                 res.status(401).send();

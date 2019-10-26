@@ -16,34 +16,80 @@ payoutsRouter.post('/', function (req, res) {
 
     var amountString = amount.toString();
     if(amountString.match(/^[0-9]+$/) != null){
-        console.log("in");
         let selectWalletQuery = "SELECT * FROM wallets where id = ?";
         let insertQuery = "INSERT INTO payouts (wallet_id, amount) VALUES (?, ?)";
 
+        let payinAmount = 0;
+        let payoutAmout = 0;
+        let debitedAmount = 0;
+        let creditedAmount = 0;
+
         req.db.query(selectWalletQuery, [wallet_id], function (err, result, fields) {
             if(err) throw err;
-            console.log(result.length);
             if(result.length>0){
-                req.db.query(insertQuery, [result[0].id, amount], function (err2, result2, fields2) {
-                    if(err2) throw err2;
+                let queryPayins = "SELECT amount FROM payins WHERE wallet_id=?";
+                let queryPayouts = "SELECT amount  FROM payouts WHERE wallet_id=?";
+                let queryTransfers = "SELECT debited_wallet_id, credited_wallet_id, amount FROM transfers";
 
-                    console.log(result2.affectedRows);
-                    if(result2.affectedRows>0){
-
-                        var totalAmountString = amount.toString();
-                        var first = totalAmountString.slice(0, (totalAmountString.length-2));
-                        var sec = totalAmountString.slice((totalAmountString.length-2), totalAmountString.length);
-                        var newTotalString = first + sec;
-                        var newAmount = parseInt(newTotalString);
-
-                        const payout = {
-                            id : result2.insertId,
-                            wallet_id : wallet_id,
-                            amount : newAmount
+                req.db.query(queryPayins, [wallet_id], function (err2, result2, fields2) {
+                    if (err2) throw err2;
+                    if (result2.length > 0) {
+                        for (let i = 0; i < result2.length; i++) {
+                            payinAmount += result2[i].amount;
                         }
-                        res.status(200).json(payout);
                     }
-                })
+
+
+                    req.db.query(queryPayouts, [wallet_id], function (err3, result3, fields3) {
+                        if (err3) throw err3;
+                        if (result3.length > 0) {
+                            for (let i = 0; i < result3.length; i++) {
+                                payoutAmout += result3[i].amount;
+                            }
+                        }
+
+
+                        req.db.query(queryTransfers, function (err4, result4, fields4) {
+                            if (err4) throw err4;
+                            if (result4.length > 0) {
+                                for (let i = 0; i < result4.length; i++) {
+                                    if (result4[i].debited_wallet_id === wallet_id) {
+                                        debitedAmount += result4[i].amount;
+                                    } else if (result4[i].credited_wallet_id === wallet_id) {
+                                        creditedAmount += result4[i].amount;
+                                    }
+                                }
+                            }
+                            let totalAmount = creditedAmount + payinAmount - debitedAmount - payoutAmout;
+
+                            console.log(Number(totalAmount));
+                            console.log(Number(amount));
+                            if (Number(totalAmount) >= Number(amount)) {
+                                req.db.query(insertQuery, [result[0].id, amount], function (err5, result5, fields5) {
+                                    if (err5) throw err5;
+
+                                    if (result5.affectedRows > 0) {
+
+                                        var totalAmountString = amount.toString();
+                                        var first = totalAmountString.slice(0, (totalAmountString.length - 2));
+                                        var sec = totalAmountString.slice((totalAmountString.length - 2), totalAmountString.length);
+                                        var newTotalString = first + sec;
+                                        var newAmount = parseInt(newTotalString);
+
+                                        const payout = {
+                                            id: result5.insertId,
+                                            wallet_id: wallet_id,
+                                            amount: newAmount
+                                        }
+                                        res.status(200).json(payout);
+                                    }
+                                });
+                            } else {
+                                res.status(400).json({message : "Invalid Amount"});
+                            }
+                        });
+                    });
+                });
             }
         })
 

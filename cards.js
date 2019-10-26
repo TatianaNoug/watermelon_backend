@@ -27,15 +27,18 @@ cardsRouter.post('/', function (req, res) {
             req.db.query(query, function (err, result, fields) {
                 if (err) throw err;
 
-                const newCard = {
-                    id: result.insertId,
-                    user_id: id,
-                    last_4: last_4_digits,
-                    brand: cardBrand,
-                    expired_at: expiredDate
-                };
-                res.status(200).json(newCard);
-            })
+                if(result.affectedRows > 0){
+                    const newCard = {
+                        id: result.insertId,
+                        user_id: id,
+                        last_4: last_4_digits,
+                        brand: cardBrand,
+                        expired_at: expiredDate
+                    };
+                    res.status(200).json(newCard);
+                }
+
+            });
         }
     }
 });
