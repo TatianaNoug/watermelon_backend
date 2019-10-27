@@ -3,6 +3,8 @@ const bodyParser = require('body-parser');
 const mysql = require('mysql');
 const app = express();
 
+var users = require('./bonusUser');
+var login = require('./bonusLogin');
 var wallets = require('./bonusWallet');
 var payins = require('./bonusPayin');
 var payouts = require('./bonusPayout');
@@ -21,7 +23,8 @@ app.use(function (req, res, next) {
 })
 app.use(bodyParser.urlencoded({extended: true}));
 
-
+app.use('/v1/users', users);
+app.use('/v1/login', login);
 app.use(function (req, res, next) {
     if("x-auth-token" in req.headers){
         let access_token = req.headers["x-auth-token"];
