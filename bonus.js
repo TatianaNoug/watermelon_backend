@@ -9,6 +9,7 @@ let wallets = require('./bonusWallet');
 let payins = require('./bonusPayin');
 let payouts = require('./bonusPayout');
 let cards = require('./bonusCards');
+let transfers = require('./bonusTransfers');
 
 let db = mysql.createConnection({
     host: "localhost",
@@ -54,7 +55,7 @@ app.use('/v1/wallets', wallets);
 app.use('/v1/payins', payins);
 app.use('/v1/payouts', payouts);
 app.use('/v1/cards', cards);
-
+app.use('/v1/transfers', transfers);
 
 app.listen(8000, function () {
     console.log("Watermelon app listening on port 8000");
