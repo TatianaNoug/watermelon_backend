@@ -3,11 +3,12 @@ const bodyParser = require('body-parser');
 const mysql = require('mysql');
 const app = express();
 
-var users = require('./bonusUser');
-var login = require('./bonusLogin');
-var wallets = require('./bonusWallet');
-var payins = require('./bonusPayin');
-var payouts = require('./bonusPayout');
+let users = require('./bonusUser');
+let login = require('./bonusLogin');
+let wallets = require('./bonusWallet');
+let payins = require('./bonusPayin');
+let payouts = require('./bonusPayout');
+let cards = require('./bonusCards');
 
 let db = mysql.createConnection({
     host: "localhost",
@@ -52,7 +53,7 @@ app.use(function (req, res, next) {
 app.use('/v1/wallets', wallets);
 app.use('/v1/payins', payins);
 app.use('/v1/payouts', payouts);
-
+app.use('/v1/cards', cards);
 
 
 app.listen(8000, function () {
