@@ -2,7 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const mysql = require('mysql');
 
-var walletsRouter = express.Router();
+let walletsRouter = express.Router();
 
 walletsRouter.use(bodyParser.urlencoded({extended: true}));
 
@@ -14,6 +14,7 @@ walletsRouter.use(bodyParser.urlencoded({extended: true}));
 walletsRouter.get('/', function (req, res) {
 
     let id = req.user.wallet_id;
+
      let payinAmount = 0;
      let payoutAmout = 0;
      let debitedAmount = 0;
@@ -56,15 +57,9 @@ walletsRouter.get('/', function (req, res) {
                  }
                  let totalAmount = creditedAmount + payinAmount - debitedAmount - payoutAmout;
 
-                 let totalAmountString = totalAmount.toString();
-                 let first = totalAmountString.slice(0, (totalAmountString.length-2));
-                 let sec = totalAmountString.slice((totalAmountString.length-2), totalAmountString.length);
-                 let newTotalString = first + sec;
-                 totalAmount = parseInt(newTotalString);
-
                  const tempWallet = {
                      wallet_id: id,
-                     balance: totalAmount
+                     balance: Number(totalAmount)
                  }
                  walletSelected.push(tempWallet);
                  res.status(200).json(walletSelected);
@@ -113,7 +108,6 @@ walletsRouter.get('/:id(\\d+)', function (req, res) {
                    req.db.query(queryTransfers, function (err4, result4, fields4) {
                        if (err4) throw err4;
                        if (result4.length > 0) {
-                           console.log(result4.length);
                            for (let i = 0; i < result4.length; i++) {
                                if (result4[i].debited_wallet_id == id) {
                                    debitedAmount += result4[i].amount;

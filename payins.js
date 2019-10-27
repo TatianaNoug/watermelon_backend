@@ -1,7 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const mysql = require('mysql');
-var payinsRouter = express.Router();
+let payinsRouter = express.Router();
 
 payinsRouter.use(bodyParser.urlencoded({extended: true}));
 
@@ -28,16 +28,10 @@ payinsRouter.post('/', function (req, res) {
 
                     if(result2.affectedRows>0){
 
-                        var totalAmountString = amount.toString();
-                        var first = totalAmountString.slice(0, (totalAmountString.length-2));
-                        var sec = totalAmountString.slice((totalAmountString.length-2), totalAmountString.length);
-                        var newTotalString = first + sec;
-                        var newAmount = parseInt(newTotalString);
-
                         const payin = {
                             id : result2.insertId,
                             wallet_id : wallet_id,
-                            amount : newAmount
+                            amount : Number(amount)
                         }
                         res.status(200).json(payin);
                     }
@@ -52,7 +46,7 @@ payinsRouter.post('/', function (req, res) {
 });
 
 payinsRouter.get('/', function (req, res) {
-    let query = `SELECT * FROM payins`;
+    let query = "SELECT * FROM payins";
 
     req.db.query(query, function (err, result, fields) {
         if (err) throw err;
@@ -79,9 +73,9 @@ payinsRouter.get('/', function (req, res) {
 payinsRouter.get('/:id(\\d+)', function (req, res) {
     let id = req.params.id;
 
-    let query = `SELECT *  FROM payins WHERE id=${id}`;
+    let query = "SELECT *  FROM payins WHERE id=?";
 
-    req.db.query(query, function (err, result, fields) {
+    req.db.query(query,[id], function (err, result, fields) {
         if (err) throw err;
 
         if(result.length > 0){

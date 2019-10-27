@@ -1,7 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const mysql = require('mysql');
-var payoutsRouter = express.Router();
+let payoutsRouter = express.Router();
 
 payoutsRouter.use(bodyParser.urlencoded({extended: true}));
 
@@ -74,16 +74,10 @@ payoutsRouter.post('/', function (req, res) {
 
                                     if (result5.affectedRows > 0) {
 
-                                        let totalAmountString = amount.toString();
-                                        let first = totalAmountString.slice(0, (totalAmountString.length - 2));
-                                        let sec = totalAmountString.slice((totalAmountString.length - 2), totalAmountString.length);
-                                        let newTotalString = first + sec;
-                                        let newAmount = parseInt(newTotalString);
-
                                         const payout = {
                                             id: result5.insertId,
                                             wallet_id: wallet_id,
-                                            amount: newAmount
+                                            amount: Number(amount)
                                         }
                                         res.status(200).json(payout);
                                     }
@@ -103,14 +97,14 @@ payoutsRouter.post('/', function (req, res) {
 });
 
 payoutsRouter.get('/', function (req, res) {
-    let query = `SELECT * FROM payouts`;
+    let query = "SELECT * FROM payouts";
 
     req.db.query(query, function (err, result, fields) {
         if (err) throw err;
 
         if(result.length>0){
             const selectedPayout =[];
-            for(var i = 0; i<result.length; i++) {
+            for(let i = 0; i<result.length; i++) {
                 const tempPayout ={
                     id:result[i].id,
                     wallet_id:result[i].wallet_id,
@@ -130,9 +124,9 @@ payoutsRouter.get('/', function (req, res) {
 payoutsRouter.get('/:id(\\d+)', function (req, res) {
     let id = req.params.id;
 
-    let query = `SELECT *  FROM payouts WHERE id=${id}`;
+    let query = "SELECT *  FROM payouts WHERE id=?";
 
-    req.db.query(query, function (err, result, fields) {
+    req.db.query(query,[id], function (err, result, fields) {
         if (err) throw err;
 
         if(result.length > 0){

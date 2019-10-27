@@ -1,7 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const mysql = require('mysql');
-var transfersRouter = express.Router();
+let transfersRouter = express.Router();
 
 transfersRouter.use(bodyParser.urlencoded({extended: true}));
 
@@ -18,7 +18,7 @@ transfersRouter.post('/', function (req, res) {
         res.status(400).json({message:"Cannot create a transfer to oneself"});
 
     }else{
-        var amountString = amount.toString();
+        let amountString = amount.toString();
         if(amountString.match(/^[0-9]+$/) != null){
             let payinAmount = 0;
             let payoutAmout = 0;
@@ -102,14 +102,14 @@ transfersRouter.post('/', function (req, res) {
 });
 
 transfersRouter.get('/', function (req, res) {
-    let query = `SELECT * FROM transfers`;
+    let query = "SELECT * FROM transfers";
 
     req.db.query(query, function (err, result, fields) {
         if (err) throw err;
 
         if(result.length>0){
             const selectedTransfers =[];
-            for(var i = 0; i<result.length; i++) {
+            for(let i = 0; i<result.length; i++) {
                 const tempTransfer ={
                     id:result[i].id,
                     debited_wallet_id:result[i].debited_wallet_id,
@@ -130,9 +130,9 @@ transfersRouter.get('/', function (req, res) {
 transfersRouter.get('/:id(\\d+)', function (req, res) {
     let id = req.params.id;
 
-    let query = `SELECT *  FROM transfers WHERE id=${id}`;
+    let query = "SELECT *  FROM transfers WHERE id=?";
 
-    req.db.query(query, function (err, result, fields) {
+    req.db.query(query,[id], function (err, result, fields) {
         if (err) throw err;
 
         if(result.length > 0){

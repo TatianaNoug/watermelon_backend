@@ -92,7 +92,6 @@ userRouter.get('/', function (req, res) {
     req.db.query(query,[req.user.id], function (err, result, fields) {
         if (err) throw err;
         if(result.length > 0){
-            console.log(result.length);
             const selectedUsers =[];
             for(let i = 0; i<result.length; i++) {
                 const tempUser ={
@@ -104,7 +103,6 @@ userRouter.get('/', function (req, res) {
                 }
                 selectedUsers.push(tempUser);
             };
-            console.log(selectedUsers);
             res.status(200).json(selectedUsers);
         }
 
