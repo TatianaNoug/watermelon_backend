@@ -81,11 +81,11 @@ userRouter.use(function (req, res, next) {
                 };
                 next();
             }else{
-                res.status(401).send();
+                res.status(401).json({message: "Access unauthorized"});
             }
         });
     }else{
-        res.status(401).send();
+        res.status(401).json({message: "Access unauthorized"});
     }
 });
 
