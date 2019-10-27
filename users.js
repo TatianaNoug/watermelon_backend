@@ -33,9 +33,9 @@ userRouter.post('/', function (req, res) {
                if(result0.length > 0){
                    res.status(400).json({message : "Email Address Already Exists"});
                }else{
-                   let query = `INSERT INTO users (first_name, last_name, email, password, is_admin, api_key) VALUES ('${first_name}', '${last_name}', '${email}', '${password}', '${is_admin}', '${api_key}')`;
+                   let query = "INSERT INTO users (first_name, last_name, email, password, is_admin, api_key) VALUES (?, ?, ?, ?,?, ?)";
                    let query2 = "INSERT INTO wallets (user_id) VALUES (?)";
-                   req.db.query(query, function (err, result, fields) {
+                   req.db.query(query,[first_name, last_name, email, password, is_admin, api_key], function (err, result, fields) {
                        if (err) throw err;
 
                        if (result.affectedRows) {
@@ -68,9 +68,9 @@ userRouter.post('/', function (req, res) {
 userRouter.use(function (req, res, next) {
     if("x-auth-token" in req.headers){
         let access_token = req.headers["x-auth-token"];
-        let query = `SELECT users.id, users.email, users.is_admin, wallets.id as wallet_id FROM users JOIN wallets on users.id = wallets.user_id WHERE api_key = '${access_token}'`;
+        let query = "SELECT users.id, users.email, users.is_admin, wallets.id as wallet_id FROM users JOIN wallets on users.id = wallets.user_id WHERE api_key = ?";
 
-        req.db.query(query, function (err, result, fields) {
+        req.db.query(query,[access_token], function (err, result, fields) {
             if(err) throw err;
             if(result.length > 0){
                 req.user = {
@@ -144,11 +144,8 @@ userRouter.put('/:id(\\d+)', function (req, res) {
     let last_name = req.body.last_name;
     let email = req.body.email;
 
-    console.log(id);
-    console.log(req.user.id);
-
     if (first_name === undefined || last_name === undefined || email === undefined) {
-        res.status(400).json({message: "Missing fields."});
+        res.status(400).json({message: "Missing fields"});
     }else{
         if(email.toString().indexOf("@")>0){
             let verifyUserQuery = "SELECT * FROM users WHERE id=?";
@@ -199,17 +196,19 @@ userRouter.delete('/:id(\\d+)', function (req, res) {
     let id = req.params.id;
 
     let existingUserQuery = "SELECT * FROM users WHERE id = ?";
-    let query = `DELETE FROM users WHERE id=${id}`;
+    let query = "DELETE FROM users WHERE id=?";
 
     req.db.query(existingUserQuery,[id], function (err, result, fields) {
         if(err) throw err;
 
         if(result.length > 0){
             if(id == req.user.id){
-                req.db.query(query, function (err2, result2, fields2) {
+                req.db.query(query,[id], function (err2, result2, fields2) {
                     if (err2) throw err2;
 
-                    res.status(204).json({message: "Success"});
+                    if(result2.affectedRows > 0){
+                        res.status(204).json({message: "Success"});
+                    }
                 });
             }else {
                 res.status(403).json({message: "Access Denied"});
