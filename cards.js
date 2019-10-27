@@ -1,8 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const mysql = require('mysql');
 
-var cardsRouter = express.Router();
+let cardsRouter = express.Router();
 cardsRouter.use(bodyParser.urlencoded({extended: true}));
 
 
@@ -22,9 +21,9 @@ cardsRouter.post('/', function (req, res) {
         if(expiredDate < Date.now()){
             res.status(400).json({message: "Expired Date"})
         }else {
-            let query = `INSERT INTO cards (user_id, last_4, brand, expired_at) VALUES ('${id}', '${last_4_digits}', '${cardBrand}', '${expiredDate}')`;
+            let query = "INSERT INTO cards (user_id, last_4, brand, expired_at) VALUES (?, ?, ?, ?)";
 
-            req.db.query(query, function (err, result, fields) {
+            req.db.query(query,[id, last_4_digits, cardBrand, expiredDate], function (err, result, fields) {
                 if (err) throw err;
 
                 if(result.affectedRows > 0){
@@ -45,12 +44,12 @@ cardsRouter.post('/', function (req, res) {
 
 cardsRouter.get('/', function (req, res) {
 
-    let query = `SELECT *  FROM cards `;
+    let query = "SELECT *  FROM cards ";
 
     req.db.query(query, function (err, result, fields) {
         if (err) throw err;
         const selectedCards =[];
-        for(var i = 0; i<result.length; i++) {
+        for(let i = 0; i<result.length; i++) {
             const tempCard ={
                 id:result[i].id,
                 user_id:result[i].user_id,
@@ -69,9 +68,9 @@ cardsRouter.get('/:id(\\d+)', function (req, res) {
 
     const id = req.params.id;
 
-    let query = `SELECT *  FROM cards WHERE id=${id}`;
+    let query = "SELECT *  FROM cards WHERE id=?";
 
-    req.db.query(query, function (err, result, fields) {
+    req.db.query(query,[id], function (err, result, fields) {
         if (err) throw err;
         if(result.length > 0) {
             const selectedCard = {
@@ -124,9 +123,9 @@ cardsRouter.put('/:id(\\d+)', function (req, res) {
 cardsRouter.delete('/:id(\\d+)', function (req, res) {
     let id = req.params.id;
 
-    let query = `DELETE FROM cards WHERE id=${id}`;
+    let query = "DELETE FROM cards WHERE id=?";
 
-    req.db.query(query, function (err, result, fields) {
+    req.db.query(query,[id], function (err, result, fields) {
         if (err) throw err;
 
         if(result.affectedRows > 0) {

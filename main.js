@@ -3,13 +3,13 @@ const bodyParser = require('body-parser');
 const mysql = require('mysql');
 const app = express();
 
-var users = require('./users');
-var login = require('./login');
-var cards = require('./cards');
-var wallets = require('./wallets');
-var payins = require('./payins');
-var payouts = require('./payouts');
-var transfers = require('./transfers');
+let users = require('./users');
+let login = require('./login');
+let cards = require('./cards');
+let wallets = require('./wallets');
+let payins = require('./payins');
+let payouts = require('./payouts');
+let transfers = require('./transfers');
 
 let db = mysql.createConnection({
     host: "localhost",
@@ -30,9 +30,9 @@ app.use('/v1/users',users);
 app.use(function (req, res, next) {
     if("x-auth-token" in req.headers){
         let access_token = req.headers["x-auth-token"];
-        let query = `SELECT users.id, users.email, users.is_admin, wallets.id as wallet_id FROM users JOIN wallets on users.id = wallets.user_id WHERE api_key = '${access_token}'`;
+        let query = "SELECT users.id, users.email, users.is_admin, wallets.id as wallet_id FROM users JOIN wallets on users.id = wallets.user_id WHERE api_key = ?";
 
-        req.db.query(query, function (err, result, fields) {
+        req.db.query(query,[access_token], function (err, result, fields) {
             if(err) throw err;
             if(result.length > 0){
                 req.user = {
@@ -43,11 +43,11 @@ app.use(function (req, res, next) {
                 };
                 next();
             }else{
-                res.status(401).send();
+                res.status(401).json({message : "Access Unauthorized"});
             }
         });
     }else{
-        res.status(401).send();
+        res.status(401).json({message : "Access Unauthorized"});
     }
 });
 

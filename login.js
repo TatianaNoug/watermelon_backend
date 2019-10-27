@@ -1,10 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const mysql = require('mysql');
-const jwt = require('jsonwebtoken');
-const fs = require('fs');
 
-var loginRouter = express.Router();
+let loginRouter = express.Router();
 loginRouter.use(bodyParser.urlencoded({extended: true}));
 
 loginRouter.post('/', function (req, res) {
