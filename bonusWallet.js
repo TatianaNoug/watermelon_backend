@@ -9,7 +9,7 @@ walletRouter.use(bodyParser.urlencoded({extended: true}));
 /********** WALLETS ***********/
 /****************************/
 
-walletsRouter.get('/', function (req, res) {
+walletRouter.get('/', function (req, res) {
 
     let id = req.user.wallet_id;
 
@@ -68,7 +68,7 @@ walletsRouter.get('/', function (req, res) {
 
 });
 
-walletsRouter.get('/:id(\\d+)', function (req, res) {
+walletRouter.get('/:id(\\d+)', function (req, res) {
 
     let id = req.params.id;
 

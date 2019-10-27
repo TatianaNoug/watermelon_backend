@@ -145,12 +145,12 @@ payoutsRouter.get('/:id(\\d+)', function (req, res) {
 /********** BONUS ***********/
 /****************************/
 
-payoutRouter.put('/:id(\\d+)', function (req, res) {
+payoutsRouter.put('/:id(\\d+)', function (req, res) {
     res.status(404).json({message : "Wallet Not found"});
 });
 
-payoutRouter.delete('/:id(\\d+)', function (req, res) {
+payoutsRouter.delete('/:id(\\d+)', function (req, res) {
     res.status(404).json({message : "Wallet Not found"});
 });
 
-module.exports = payoutRouter;
+module.exports = payoutsRouter;
