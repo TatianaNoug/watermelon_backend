@@ -1,7 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const mysql = require('mysql');
-var walletRouter = express.Router();
+let walletRouter = express.Router();
 
 walletRouter.use(bodyParser.urlencoded({extended: true}));
 
