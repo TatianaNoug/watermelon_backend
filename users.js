@@ -165,7 +165,7 @@ userRouter.get('/me', function (req, res) {
 
 
 userRouter.put('/:id(\\d+)', function (req, res) {
-    let id = req.params.id;
+    let id = req.user.id;
     let first_name = req.body.first_name;
     let last_name = req.body.last_name;
     let email = req.body.email;
