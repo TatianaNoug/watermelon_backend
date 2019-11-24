@@ -1,6 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const mysql = require('mysql');
+const cors = require('cors');
 const app = express();
 
 let users = require('./users');
@@ -18,6 +19,9 @@ let db = mysql.createConnection({
     database: "watermelon",
     port: "8889"
 });
+
+app.use(cors());
+app.use(bodyParser.json());
 
 app.use(function (req, res, next) {
     req.db = db;

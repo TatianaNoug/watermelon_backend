@@ -10,10 +10,11 @@ cardsRouter.use(bodyParser.urlencoded({extended: true}));
 /****************************/
 
 cardsRouter.post('/', function (req, res) {
-    let id = req.body.user_id;
+    let id = req.user.id;
     let last_4_digits = req.body.last_4;
     let cardBrand = req.body.brand;
     let expiredDate = req.body.expired_at;
+
 
     if (id === undefined || last_4_digits === undefined || cardBrand === undefined || expiredDate === undefined) {
         res.status(400).json({message: "Missing Fields"})

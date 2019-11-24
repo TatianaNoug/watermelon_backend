@@ -21,6 +21,10 @@ userRouter.post('/', function (req, res) {
 
     if(first_name === undefined || last_name === undefined || email === undefined || password === undefined){
         res.status(400).json({message : "Missing fields"});
+        console.log("F: "+first_name);
+        console.log("L "+last_name);
+        console.log("E "+email);
+        console.log("P "+password);
     }else {
         if(email.toString().indexOf("@")>0){
             let verifyEmailQuery = "SELECT * FROM users WHERE email=?";
@@ -61,6 +65,8 @@ userRouter.post('/', function (req, res) {
     }
 
 });
+
+/**/
 
 userRouter.use(function (req, res, next) {
     if("x-auth-token" in req.headers){
@@ -132,6 +138,31 @@ userRouter.get('/:id(\\d+)', function (req, res) {
         }
     });
 });
+
+userRouter.get('/me', function (req, res) {
+    let id = req.user.id;
+    let query = "SELECT * FROM users WHERE id=? ";
+
+    req.db.query(query,[id], function (err, result, fields) {
+        if (err) throw err;
+
+        if(result.length > 0){
+            const selectedUser = {
+                id: result[0].id,
+                first_name: result[0].first_name,
+                last_name: result[0].last_name,
+                email: result[0].email,
+                access_token: result[0].api_key,
+                is_admin: false
+            }
+
+            res.status(200).json(selectedUser);
+        }else{
+            res.status(404).json({message: "User not found"});
+        }
+    });
+});
+
 
 userRouter.put('/:id(\\d+)', function (req, res) {
     let id = req.params.id;
